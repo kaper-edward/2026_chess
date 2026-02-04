@@ -6,6 +6,11 @@
 #include "chess/ICheckDetector.h"
 #include "chess/IMoveRules.h"
 
+enum class GameStatus {
+  Ongoing,
+  NoLegalMoves
+};
+
 class GameState {
  public:
   GameState(std::unique_ptr<IMoveRules> moveRules, std::unique_ptr<ICheckDetector> checkDetector);
@@ -18,9 +23,12 @@ class GameState {
   const Board& board() const { return board_; }
   Color turn() const { return turn_; }
 
+  GameStatus status() const;
   bool tryMove(Position from, Position to);
 
  private:
+  bool hasAnyLegalMove(Color color) const;
+
   Board board_{};
   Color turn_ = Color::White;
   std::unique_ptr<IMoveRules> moveRules_;

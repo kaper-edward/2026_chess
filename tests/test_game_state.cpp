@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "chess/GameState.h"
+#include "chess/CheckDetector.h"
 #include "chess/ICheckDetector.h"
 #include "chess/IMoveRules.h"
 #include "chess/MoveRules.h"
@@ -94,4 +95,62 @@ TEST(GameState, UsesMoveRulesInterface) {
   const Piece* piece = game.board().pieceAt({4, 7});
   ASSERT_NE(piece, nullptr);
   EXPECT_EQ(piece->type, PieceType::Rook);
+}
+
+TEST(GameState, StatusOngoingWhenLegalMoveExists) {
+  Board board;
+  board.placePiece({7, 4}, {PieceType::King, Color::White});
+  board.placePiece({0, 4}, {PieceType::King, Color::Black});
+
+  GameState game(board, Color::White,
+                 std::make_unique<MoveRules>(),
+                 std::make_unique<CheckDetector>());
+
+  EXPECT_EQ(game.status(), GameStatus::Ongoing);
+}
+
+TEST(GameState, StatusOngoingOnStandardSetup) {
+  GameState game = GameState::Standard(std::make_unique<MoveRules>(),
+                                       std::make_unique<CheckDetector>());
+  EXPECT_EQ(game.status(), GameStatus::Ongoing);
+}
+
+TEST(GameState, StatusOngoingWhenOtherPieceCanResolveCheck) {
+  Board board;
+  board.placePiece({7, 4}, {PieceType::King, Color::White});
+  board.placePiece({0, 0}, {PieceType::King, Color::Black});
+  board.placePiece({7, 7}, {PieceType::Rook, Color::Black});
+  board.placePiece({6, 7}, {PieceType::Rook, Color::White});
+
+  GameState game(board, Color::White,
+                 std::make_unique<MoveRules>(),
+                 std::make_unique<CheckDetector>());
+
+  EXPECT_EQ(game.status(), GameStatus::Ongoing);
+}
+
+TEST(GameState, StatusNoLegalMovesInStalemateLikePosition) {
+  Board board;
+  board.placePiece({7, 7}, {PieceType::King, Color::White});
+  board.placePiece({5, 6}, {PieceType::King, Color::Black});
+  board.placePiece({6, 5}, {PieceType::Queen, Color::Black});
+
+  GameState game(board, Color::White,
+                 std::make_unique<MoveRules>(),
+                 std::make_unique<CheckDetector>());
+
+  EXPECT_EQ(game.status(), GameStatus::NoLegalMoves);
+}
+
+TEST(GameState, StatusNoLegalMovesInCheckmateLikePosition) {
+  Board board;
+  board.placePiece({7, 7}, {PieceType::King, Color::White});
+  board.placePiece({5, 6}, {PieceType::King, Color::Black});
+  board.placePiece({6, 7}, {PieceType::Queen, Color::Black});
+
+  GameState game(board, Color::White,
+                 std::make_unique<MoveRules>(),
+                 std::make_unique<CheckDetector>());
+
+  EXPECT_EQ(game.status(), GameStatus::NoLegalMoves);
 }
