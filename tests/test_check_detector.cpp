@@ -7,6 +7,7 @@
 TEST(CheckDetector, DetectsRookCheck) {
   Board board;
   board.placePiece({4, 4}, {PieceType::King, Color::White});
+  board.placePiece({0, 4}, {PieceType::King, Color::Black});
   board.placePiece({4, 7}, {PieceType::Rook, Color::Black});
 
   CheckDetector detector;
@@ -18,6 +19,33 @@ TEST(CheckDetector, DetectsKnightCheck) {
   Board board;
   board.placePiece({4, 4}, {PieceType::King, Color::White});
   board.placePiece({6, 5}, {PieceType::Knight, Color::Black});
+
+  CheckDetector detector;
+  EXPECT_TRUE(detector.inCheck(board, Color::White));
+}
+
+TEST(CheckDetector, DetectsPawnCheck) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::King, Color::White});
+  board.placePiece({3, 3}, {PieceType::Pawn, Color::Black});
+
+  CheckDetector detector;
+  EXPECT_TRUE(detector.inCheck(board, Color::White));
+}
+
+TEST(CheckDetector, DetectsBishopDiagonalCheck) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::King, Color::White});
+  board.placePiece({1, 1}, {PieceType::Bishop, Color::Black});
+
+  CheckDetector detector;
+  EXPECT_TRUE(detector.inCheck(board, Color::White));
+}
+
+TEST(CheckDetector, DetectsAdjacentKingCheck) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::King, Color::White});
+  board.placePiece({5, 5}, {PieceType::King, Color::Black});
 
   CheckDetector detector;
   EXPECT_TRUE(detector.inCheck(board, Color::White));

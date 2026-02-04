@@ -1,6 +1,7 @@
 #include "chess/CheckDetector.h"
 
 #include <array>
+#include <cassert>
 #include <optional>
 
 namespace {
@@ -20,10 +21,32 @@ bool isEnemyPiece(const Board& board, Position pos, Color enemy, PieceType type)
   const Piece* piece = board.pieceAt(pos);
   return piece && piece->color == enemy && piece->type == type;
 }
+
+bool isAttackedAlongDirs(const Board& board, Position start, Color enemy,
+                          const std::array<std::pair<int, int>, 4>& dirs,
+                          PieceType typeA, PieceType typeB) {
+  for (const auto& [dr, dc] : dirs) {
+    int row = start.row + dr;
+    int col = start.col + dc;
+    while (Board::isInside({row, col})) {
+      const Piece* piece = board.pieceAt({row, col});
+      if (piece) {
+        if (piece->color == enemy && (piece->type == typeA || piece->type == typeB)) {
+          return true;
+        }
+        break;
+      }
+      row += dr;
+      col += dc;
+    }
+  }
+  return false;
+}
 }  // namespace
 
 bool CheckDetector::inCheck(const Board& board, Color color) const {
   auto kingPosOpt = findKing(board, color);
+  assert(kingPosOpt.has_value() && "Board missing king");
   if (!kingPosOpt) {
     return false;
   }
@@ -63,38 +86,16 @@ bool CheckDetector::inCheck(const Board& board, Color color) const {
 
   static constexpr std::array<std::pair<int, int>, 4> rookDirs = {
       {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}};
-  for (const auto& [dr, dc] : rookDirs) {
-    int row = kingPos.row + dr;
-    int col = kingPos.col + dc;
-    while (Board::isInside({row, col})) {
-      const Piece* piece = board.pieceAt({row, col});
-      if (piece) {
-        if (piece->color == enemy && (piece->type == PieceType::Rook || piece->type == PieceType::Queen)) {
-          return true;
-        }
-        break;
-      }
-      row += dr;
-      col += dc;
-    }
+  if (isAttackedAlongDirs(board, kingPos, enemy, rookDirs, PieceType::Rook,
+                          PieceType::Queen)) {
+    return true;
   }
 
   static constexpr std::array<std::pair<int, int>, 4> bishopDirs = {
       {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}}};
-  for (const auto& [dr, dc] : bishopDirs) {
-    int row = kingPos.row + dr;
-    int col = kingPos.col + dc;
-    while (Board::isInside({row, col})) {
-      const Piece* piece = board.pieceAt({row, col});
-      if (piece) {
-        if (piece->color == enemy && (piece->type == PieceType::Bishop || piece->type == PieceType::Queen)) {
-          return true;
-        }
-        break;
-      }
-      row += dr;
-      col += dc;
-    }
+  if (isAttackedAlongDirs(board, kingPos, enemy, bishopDirs, PieceType::Bishop,
+                          PieceType::Queen)) {
+    return true;
   }
 
   return false;
