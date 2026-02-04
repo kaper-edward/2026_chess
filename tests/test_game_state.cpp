@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "chess/GameState.h"
+#include "chess/ICheckDetector.h"
 #include "chess/IMoveRules.h"
 #include "chess/MoveRules.h"
 
@@ -18,11 +19,16 @@ class FakeMoveRules : public IMoveRules {
  private:
   std::vector<Position> moves_;
 };
+
+class FakeCheckDetector : public ICheckDetector {
+ public:
+  bool inCheck(const Board&, Color) const override { return false; }
+};
 }  // namespace
 
 TEST(GameState, TurnAlternatesOnValidMove) {
   auto rules = std::make_unique<MoveRules>();
-  GameState game = GameState::Standard(std::move(rules));
+  GameState game = GameState::Standard(std::move(rules), std::make_unique<FakeCheckDetector>());
 
   EXPECT_EQ(game.turn(), Color::White);
   EXPECT_TRUE(game.tryMove({6, 0}, {5, 0}));
@@ -38,7 +44,8 @@ TEST(GameState, RejectsMoveToSameColorPiece) {
   board.placePiece({4, 4}, {PieceType::Rook, Color::White});
   board.placePiece({4, 6}, {PieceType::Knight, Color::White});
 
-  GameState game(board, Color::White, std::make_unique<MoveRules>());
+  GameState game(board, Color::White, std::make_unique<MoveRules>(),
+                 std::make_unique<FakeCheckDetector>());
 
   EXPECT_FALSE(game.tryMove({4, 4}, {4, 6}));
 }
@@ -48,7 +55,8 @@ TEST(GameState, EnforcesPathBlockingForSlidingPieces) {
   board.placePiece({4, 4}, {PieceType::Rook, Color::White});
   board.placePiece({4, 5}, {PieceType::Pawn, Color::White});
 
-  GameState game(board, Color::White, std::make_unique<MoveRules>());
+  GameState game(board, Color::White, std::make_unique<MoveRules>(),
+                 std::make_unique<FakeCheckDetector>());
 
   EXPECT_FALSE(game.tryMove({4, 4}, {4, 7}));
 }
@@ -58,7 +66,8 @@ TEST(GameState, AllowsCaptureOfOpponentPiece) {
   board.placePiece({4, 4}, {PieceType::Rook, Color::White});
   board.placePiece({4, 2}, {PieceType::Bishop, Color::Black});
 
-  GameState game(board, Color::White, std::make_unique<MoveRules>());
+  GameState game(board, Color::White, std::make_unique<MoveRules>(),
+                 std::make_unique<FakeCheckDetector>());
 
   EXPECT_TRUE(game.tryMove({4, 4}, {4, 2}));
   const Piece* piece = game.board().pieceAt({4, 2});
@@ -68,7 +77,8 @@ TEST(GameState, AllowsCaptureOfOpponentPiece) {
 }
 
 TEST(GameState, RejectsMoveFromEmptySquare) {
-  GameState game = GameState::Standard(std::make_unique<MoveRules>());
+  GameState game = GameState::Standard(std::make_unique<MoveRules>(),
+                                       std::make_unique<FakeCheckDetector>());
   EXPECT_FALSE(game.tryMove({3, 3}, {3, 4}));
 }
 
@@ -77,7 +87,8 @@ TEST(GameState, UsesMoveRulesInterface) {
   board.placePiece({4, 4}, {PieceType::Rook, Color::White});
 
   GameState game(board, Color::White,
-                 std::make_unique<FakeMoveRules>(std::vector<Position>{{4, 7}}));
+                 std::make_unique<FakeMoveRules>(std::vector<Position>{{4, 7}}),
+                 std::make_unique<FakeCheckDetector>());
 
   EXPECT_TRUE(game.tryMove({4, 4}, {4, 7}));
   const Piece* piece = game.board().pieceAt({4, 7});
