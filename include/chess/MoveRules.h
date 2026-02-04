@@ -6,5 +6,6 @@
 
 class MoveRules {
  public:
-  static std::vector<Position> legalMoves(const Board& board, Position from);
+  // Returns pseudo-legal moves (ignores check).
+  static std::vector<Position> pseudoLegalMoves(const Board& board, Position from);
 };

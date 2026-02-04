@@ -7,6 +7,8 @@
 
 class Board {
  public:
+  // Coordinate convention:
+  // row 0 = Black back rank, row 7 = White back rank.
   Board();
 
   static Board StandardSetup();

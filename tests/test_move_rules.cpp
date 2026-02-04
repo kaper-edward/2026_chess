@@ -1,40 +1,60 @@
 #include <gtest/gtest.h>
 
 #include <set>
-#include <utility>
 
 #include "chess/Board.h"
 #include "chess/MoveRules.h"
 
 namespace {
-std::set<std::pair<int, int>> ToSet(const std::vector<Position>& moves) {
-  std::set<std::pair<int, int>> result;
-  for (const auto& move : moves) {
-    result.insert({move.row, move.col});
+std::set<Position> ToSet(const std::vector<Position>& moves) {
+  return std::set<Position>(moves.begin(), moves.end());
+}
+
+std::set<Position> QueenExpectedMoves(Position from) {
+  std::set<Position> expected;
+  for (int i = 0; i < 8; ++i) {
+    if (i != from.row) {
+      expected.insert({i, from.col});
+    }
+    if (i != from.col) {
+      expected.insert({from.row, i});
+    }
   }
-  return result;
+
+  for (int dr : {-1, 1}) {
+    for (int dc : {-1, 1}) {
+      int row = from.row + dr;
+      int col = from.col + dc;
+      while (row >= 0 && row < 8 && col >= 0 && col < 8) {
+        expected.insert({row, col});
+        row += dr;
+        col += dc;
+      }
+    }
+  }
+  return expected;
 }
 }  // namespace
 
 TEST(MoveRules, KnightJumpsOverPieces) {
   Board board = Board::StandardSetup();
-  auto moves = MoveRules::legalMoves(board, {7, 1});
+  auto moves = MoveRules::pseudoLegalMoves(board, {7, 1});
 
-  std::set<std::pair<int, int>> expected = {{5, 0}, {5, 2}};
+  std::set<Position> expected = {{5, 0}, {5, 2}};
   EXPECT_EQ(ToSet(moves), expected);
 }
 
 TEST(MoveRules, BishopBlockedAtStart) {
   Board board = Board::StandardSetup();
-  auto moves = MoveRules::legalMoves(board, {7, 2});
+  auto moves = MoveRules::pseudoLegalMoves(board, {7, 2});
   EXPECT_TRUE(moves.empty());
 }
 
 TEST(MoveRules, PawnInitialMoves) {
   Board board = Board::StandardSetup();
-  auto moves = MoveRules::legalMoves(board, {6, 0});
+  auto moves = MoveRules::pseudoLegalMoves(board, {6, 0});
 
-  std::set<std::pair<int, int>> expected = {{5, 0}, {4, 0}};
+  std::set<Position> expected = {{5, 0}, {4, 0}};
   EXPECT_EQ(ToSet(moves), expected);
 }
 
@@ -44,8 +64,18 @@ TEST(MoveRules, PawnCapturesDiagonal) {
   board.placePiece({3, 3}, {PieceType::Knight, Color::Black});
   board.placePiece({3, 5}, {PieceType::Bishop, Color::Black});
 
-  auto moves = MoveRules::legalMoves(board, {4, 4});
-  std::set<std::pair<int, int>> expected = {{3, 4}, {3, 3}, {3, 5}};
+  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  std::set<Position> expected = {{3, 4}, {3, 3}, {3, 5}};
+  EXPECT_EQ(ToSet(moves), expected);
+}
+
+TEST(MoveRules, PawnEdgeCapture) {
+  Board board;
+  board.placePiece({4, 0}, {PieceType::Pawn, Color::White});
+  board.placePiece({3, 1}, {PieceType::Knight, Color::Black});
+
+  auto moves = MoveRules::pseudoLegalMoves(board, {4, 0});
+  std::set<Position> expected = {{3, 0}, {3, 1}};
   EXPECT_EQ(ToSet(moves), expected);
 }
 
@@ -55,8 +85,34 @@ TEST(MoveRules, RookStopsAtBlockingPiece) {
   board.placePiece({4, 6}, {PieceType::Knight, Color::White});
   board.placePiece({4, 2}, {PieceType::Knight, Color::Black});
 
-  auto moves = MoveRules::legalMoves(board, {4, 4});
-  std::set<std::pair<int, int>> expected = {
+  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  std::set<Position> expected = {
       {4, 5}, {4, 3}, {4, 2}, {5, 4}, {6, 4}, {7, 4}, {3, 4}, {2, 4}, {1, 4}, {0, 4}};
   EXPECT_EQ(ToSet(moves), expected);
+}
+
+TEST(MoveRules, KingMovesOneSquare) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::King, Color::White});
+
+  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  std::set<Position> expected = {
+      {3, 3}, {3, 4}, {3, 5},
+      {4, 3},         {4, 5},
+      {5, 3}, {5, 4}, {5, 5}};
+  EXPECT_EQ(ToSet(moves), expected);
+}
+
+TEST(MoveRules, QueenMovesAlongLines) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::Queen, Color::White});
+
+  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  EXPECT_EQ(ToSet(moves), QueenExpectedMoves({4, 4}));
+}
+
+TEST(MoveRules, EmptyOrOutOfRangeReturnsEmpty) {
+  Board board = Board::StandardSetup();
+  EXPECT_TRUE(MoveRules::pseudoLegalMoves(board, {3, 3}).empty());
+  EXPECT_TRUE(MoveRules::pseudoLegalMoves(board, {-1, 0}).empty());
 }

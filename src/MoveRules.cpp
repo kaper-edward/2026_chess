@@ -39,7 +39,7 @@ void addRay(const Board& board, const Piece& piece, Position from,
 }
 }  // namespace
 
-std::vector<Position> MoveRules::legalMoves(const Board& board, Position from) {
+std::vector<Position> MoveRules::pseudoLegalMoves(const Board& board, Position from) {
   std::vector<Position> moves;
   if (!Board::isInside(from)) {
     return moves;
@@ -63,7 +63,7 @@ std::vector<Position> MoveRules::legalMoves(const Board& board, Position from) {
       break;
     }
     case PieceType::Queen: {
-      static const std::array<std::pair<int, int>, 8> directions = {
+      constexpr std::array<std::pair<int, int>, 8> directions = {
           {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}}};
       for (const auto& [dr, dc] : directions) {
         addRay(board, *piece, from, dr, dc, moves);
@@ -71,7 +71,7 @@ std::vector<Position> MoveRules::legalMoves(const Board& board, Position from) {
       break;
     }
     case PieceType::Rook: {
-      static const std::array<std::pair<int, int>, 4> directions = {
+      constexpr std::array<std::pair<int, int>, 4> directions = {
           {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}};
       for (const auto& [dr, dc] : directions) {
         addRay(board, *piece, from, dr, dc, moves);
@@ -79,7 +79,7 @@ std::vector<Position> MoveRules::legalMoves(const Board& board, Position from) {
       break;
     }
     case PieceType::Bishop: {
-      static const std::array<std::pair<int, int>, 4> directions = {
+      constexpr std::array<std::pair<int, int>, 4> directions = {
           {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}}};
       for (const auto& [dr, dc] : directions) {
         addRay(board, *piece, from, dr, dc, moves);
@@ -87,7 +87,7 @@ std::vector<Position> MoveRules::legalMoves(const Board& board, Position from) {
       break;
     }
     case PieceType::Knight: {
-      static const std::array<std::pair<int, int>, 8> jumps = {
+      constexpr std::array<std::pair<int, int>, 8> jumps = {
           {{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}}};
       for (const auto& [dr, dc] : jumps) {
         addIfValid(board, *piece, {from.row + dr, from.col + dc}, moves);
