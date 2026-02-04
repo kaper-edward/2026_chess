@@ -1,7 +1,24 @@
 #include <gtest/gtest.h>
 
+#include <utility>
+
 #include "chess/GameState.h"
+#include "chess/IMoveRules.h"
 #include "chess/MoveRules.h"
+
+namespace {
+class FakeMoveRules : public IMoveRules {
+ public:
+  explicit FakeMoveRules(std::vector<Position> moves) : moves_(std::move(moves)) {}
+
+  std::vector<Position> pseudoLegalMoves(const Board&, Position) const override {
+    return moves_;
+  }
+
+ private:
+  std::vector<Position> moves_;
+};
+}  // namespace
 
 TEST(GameState, TurnAlternatesOnValidMove) {
   auto rules = std::make_unique<MoveRules>();
@@ -53,4 +70,17 @@ TEST(GameState, AllowsCaptureOfOpponentPiece) {
 TEST(GameState, RejectsMoveFromEmptySquare) {
   GameState game = GameState::Standard(std::make_unique<MoveRules>());
   EXPECT_FALSE(game.tryMove({3, 3}, {3, 4}));
+}
+
+TEST(GameState, UsesMoveRulesInterface) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::Rook, Color::White});
+
+  GameState game(board, Color::White,
+                 std::make_unique<FakeMoveRules>(std::vector<Position>{{4, 7}}));
+
+  EXPECT_TRUE(game.tryMove({4, 4}, {4, 7}));
+  const Piece* piece = game.board().pieceAt({4, 7});
+  ASSERT_NE(piece, nullptr);
+  EXPECT_EQ(piece->type, PieceType::Rook);
 }

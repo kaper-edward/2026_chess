@@ -3,10 +3,6 @@
 #include <array>
 
 namespace {
-Color opposite(Color color) {
-  return (color == Color::White) ? Color::Black : Color::White;
-}
-
 void addIfValid(const Board& board, const Piece& piece, Position pos,
                std::vector<Position>& moves) {
   if (!Board::isInside(pos)) {
