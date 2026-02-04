@@ -7,5 +7,5 @@
 
 class CoordinateParser {
  public:
-  static std::optional<Position> Parse(const std::string& input);
+  static std::optional<Position> parse(const std::string& input);
 };

@@ -2,7 +2,7 @@
 
 #include <cctype>
 
-std::optional<Position> CoordinateParser::Parse(const std::string& input) {
+std::optional<Position> CoordinateParser::parse(const std::string& input) {
   if (input.size() != 2) {
     return std::nullopt;
   }

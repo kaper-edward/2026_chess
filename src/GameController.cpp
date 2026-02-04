@@ -6,22 +6,22 @@ GameController::GameController(std::unique_ptr<IMoveRules> moveRules,
                                std::unique_ptr<ICheckDetector> checkDetector)
     : state_(GameState::Standard(std::move(moveRules), std::move(checkDetector))) {}
 
-bool GameController::MakeMove(const std::string& from, const std::string& to) {
-  auto fromPos = CoordinateParser::Parse(from);
+bool GameController::makeMove(const std::string& from, const std::string& to) {
+  auto fromPos = CoordinateParser::parse(from);
   if (!fromPos) {
     return false;
   }
-  auto toPos = CoordinateParser::Parse(to);
+  auto toPos = CoordinateParser::parse(to);
   if (!toPos) {
     return false;
   }
   return state_.tryMove(*fromPos, *toPos);
 }
 
-GameStatus GameController::Status() const {
+GameStatus GameController::status() const {
   return state_.status();
 }
 
-Color GameController::Turn() const {
+Color GameController::turn() const {
   return state_.turn();
 }

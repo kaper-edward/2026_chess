@@ -5,11 +5,7 @@
 #include "chess/Board.h"
 #include "chess/ICheckDetector.h"
 #include "chess/IMoveRules.h"
-
-enum class GameStatus {
-  Ongoing,
-  NoLegalMoves
-};
+#include "chess/GameStatus.h"
 
 class GameState {
  public:
