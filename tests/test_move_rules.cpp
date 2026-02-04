@@ -38,7 +38,8 @@ std::set<Position> QueenExpectedMoves(Position from) {
 
 TEST(MoveRules, KnightJumpsOverPieces) {
   Board board = Board::StandardSetup();
-  auto moves = MoveRules::pseudoLegalMoves(board, {7, 1});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {7, 1});
 
   std::set<Position> expected = {{5, 0}, {5, 2}};
   EXPECT_EQ(ToSet(moves), expected);
@@ -46,13 +47,15 @@ TEST(MoveRules, KnightJumpsOverPieces) {
 
 TEST(MoveRules, BishopBlockedAtStart) {
   Board board = Board::StandardSetup();
-  auto moves = MoveRules::pseudoLegalMoves(board, {7, 2});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {7, 2});
   EXPECT_TRUE(moves.empty());
 }
 
 TEST(MoveRules, PawnInitialMoves) {
   Board board = Board::StandardSetup();
-  auto moves = MoveRules::pseudoLegalMoves(board, {6, 0});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {6, 0});
 
   std::set<Position> expected = {{5, 0}, {4, 0}};
   EXPECT_EQ(ToSet(moves), expected);
@@ -64,7 +67,8 @@ TEST(MoveRules, PawnCapturesDiagonal) {
   board.placePiece({3, 3}, {PieceType::Knight, Color::Black});
   board.placePiece({3, 5}, {PieceType::Bishop, Color::Black});
 
-  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {4, 4});
   std::set<Position> expected = {{3, 4}, {3, 3}, {3, 5}};
   EXPECT_EQ(ToSet(moves), expected);
 }
@@ -74,7 +78,8 @@ TEST(MoveRules, PawnEdgeCapture) {
   board.placePiece({4, 0}, {PieceType::Pawn, Color::White});
   board.placePiece({3, 1}, {PieceType::Knight, Color::Black});
 
-  auto moves = MoveRules::pseudoLegalMoves(board, {4, 0});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {4, 0});
   std::set<Position> expected = {{3, 0}, {3, 1}};
   EXPECT_EQ(ToSet(moves), expected);
 }
@@ -85,7 +90,8 @@ TEST(MoveRules, RookStopsAtBlockingPiece) {
   board.placePiece({4, 6}, {PieceType::Knight, Color::White});
   board.placePiece({4, 2}, {PieceType::Knight, Color::Black});
 
-  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {4, 4});
   std::set<Position> expected = {
       {4, 5}, {4, 3}, {4, 2}, {5, 4}, {6, 4}, {7, 4}, {3, 4}, {2, 4}, {1, 4}, {0, 4}};
   EXPECT_EQ(ToSet(moves), expected);
@@ -95,7 +101,8 @@ TEST(MoveRules, KingMovesOneSquare) {
   Board board;
   board.placePiece({4, 4}, {PieceType::King, Color::White});
 
-  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {4, 4});
   std::set<Position> expected = {
       {3, 3}, {3, 4}, {3, 5},
       {4, 3},         {4, 5},
@@ -107,12 +114,14 @@ TEST(MoveRules, QueenMovesAlongLines) {
   Board board;
   board.placePiece({4, 4}, {PieceType::Queen, Color::White});
 
-  auto moves = MoveRules::pseudoLegalMoves(board, {4, 4});
+  MoveRules rules;
+  auto moves = rules.pseudoLegalMoves(board, {4, 4});
   EXPECT_EQ(ToSet(moves), QueenExpectedMoves({4, 4}));
 }
 
 TEST(MoveRules, EmptyOrOutOfRangeReturnsEmpty) {
   Board board = Board::StandardSetup();
-  EXPECT_TRUE(MoveRules::pseudoLegalMoves(board, {3, 3}).empty());
-  EXPECT_TRUE(MoveRules::pseudoLegalMoves(board, {-1, 0}).empty());
+  MoveRules rules;
+  EXPECT_TRUE(rules.pseudoLegalMoves(board, {3, 3}).empty());
+  EXPECT_TRUE(rules.pseudoLegalMoves(board, {-1, 0}).empty());
 }

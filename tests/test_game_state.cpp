@@ -1,0 +1,56 @@
+#include <gtest/gtest.h>
+
+#include "chess/GameState.h"
+#include "chess/MoveRules.h"
+
+TEST(GameState, TurnAlternatesOnValidMove) {
+  auto rules = std::make_unique<MoveRules>();
+  GameState game = GameState::Standard(std::move(rules));
+
+  EXPECT_EQ(game.turn(), Color::White);
+  EXPECT_TRUE(game.tryMove({6, 0}, {5, 0}));
+  EXPECT_EQ(game.turn(), Color::Black);
+
+  EXPECT_FALSE(game.tryMove({6, 1}, {5, 1}));
+  EXPECT_TRUE(game.tryMove({1, 0}, {2, 0}));
+  EXPECT_EQ(game.turn(), Color::White);
+}
+
+TEST(GameState, RejectsMoveToSameColorPiece) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::Rook, Color::White});
+  board.placePiece({4, 6}, {PieceType::Knight, Color::White});
+
+  GameState game(board, Color::White, std::make_unique<MoveRules>());
+
+  EXPECT_FALSE(game.tryMove({4, 4}, {4, 6}));
+}
+
+TEST(GameState, EnforcesPathBlockingForSlidingPieces) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::Rook, Color::White});
+  board.placePiece({4, 5}, {PieceType::Pawn, Color::White});
+
+  GameState game(board, Color::White, std::make_unique<MoveRules>());
+
+  EXPECT_FALSE(game.tryMove({4, 4}, {4, 7}));
+}
+
+TEST(GameState, AllowsCaptureOfOpponentPiece) {
+  Board board;
+  board.placePiece({4, 4}, {PieceType::Rook, Color::White});
+  board.placePiece({4, 2}, {PieceType::Bishop, Color::Black});
+
+  GameState game(board, Color::White, std::make_unique<MoveRules>());
+
+  EXPECT_TRUE(game.tryMove({4, 4}, {4, 2}));
+  const Piece* piece = game.board().pieceAt({4, 2});
+  ASSERT_NE(piece, nullptr);
+  EXPECT_EQ(piece->type, PieceType::Rook);
+  EXPECT_EQ(piece->color, Color::White);
+}
+
+TEST(GameState, RejectsMoveFromEmptySquare) {
+  GameState game = GameState::Standard(std::make_unique<MoveRules>());
+  EXPECT_FALSE(game.tryMove({3, 3}, {3, 4}));
+}

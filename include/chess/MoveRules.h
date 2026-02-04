@@ -1,11 +1,10 @@
 #pragma once
 
 #include <vector>
-#include "chess/Board.h"
-#include "chess/Position.h"
+#include "chess/IMoveRules.h"
 
-class MoveRules {
+class MoveRules final : public IMoveRules {
  public:
   // Returns pseudo-legal moves (ignores check).
-  static std::vector<Position> pseudoLegalMoves(const Board& board, Position from);
+  std::vector<Position> pseudoLegalMoves(const Board& board, Position from) const override;
 };

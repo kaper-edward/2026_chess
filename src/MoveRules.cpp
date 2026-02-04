@@ -39,7 +39,7 @@ void addRay(const Board& board, const Piece& piece, Position from,
 }
 }  // namespace
 
-std::vector<Position> MoveRules::pseudoLegalMoves(const Board& board, Position from) {
+std::vector<Position> MoveRules::pseudoLegalMoves(const Board& board, Position from) const {
   std::vector<Position> moves;
   if (!Board::isInside(from)) {
     return moves;
