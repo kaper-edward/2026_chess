@@ -9,18 +9,30 @@ bool containsMove(const std::vector<Position>& moves, Position target) {
 }
 }  // namespace
 
-GameState::GameState(std::unique_ptr<IMoveRules> moveRules)
-    : board_(), turn_(Color::White), moveRules_(std::move(moveRules)) {
+GameState::GameState(std::unique_ptr<IMoveRules> moveRules,
+                     std::unique_ptr<ICheckDetector> checkDetector)
+    : board_(),
+      turn_(Color::White),
+      moveRules_(std::move(moveRules)),
+      checkDetector_(std::move(checkDetector)) {
   assert(moveRules_ && "IMoveRules must not be null");
+  assert(checkDetector_ && "ICheckDetector must not be null");
 }
 
-GameState::GameState(Board board, Color turn, std::unique_ptr<IMoveRules> moveRules)
-    : board_(std::move(board)), turn_(turn), moveRules_(std::move(moveRules)) {
+GameState::GameState(Board board, Color turn, std::unique_ptr<IMoveRules> moveRules,
+                     std::unique_ptr<ICheckDetector> checkDetector)
+    : board_(std::move(board)),
+      turn_(turn),
+      moveRules_(std::move(moveRules)),
+      checkDetector_(std::move(checkDetector)) {
   assert(moveRules_ && "IMoveRules must not be null");
+  assert(checkDetector_ && "ICheckDetector must not be null");
 }
 
-GameState GameState::Standard(std::unique_ptr<IMoveRules> moveRules) {
-  return GameState(Board::StandardSetup(), Color::White, std::move(moveRules));
+GameState GameState::Standard(std::unique_ptr<IMoveRules> moveRules,
+                              std::unique_ptr<ICheckDetector> checkDetector) {
+  return GameState(Board::StandardSetup(), Color::White, std::move(moveRules),
+                   std::move(checkDetector));
 }
 
 bool GameState::tryMove(Position from, Position to) {
@@ -44,7 +56,13 @@ bool GameState::tryMove(Position from, Position to) {
     return false;
   }
 
-  board_.movePiece(from, to);
+  Board next = board_;
+  next.movePiece(from, to);
+  if (checkDetector_->inCheck(next, turn_)) {
+    return false;
+  }
+
+  board_ = std::move(next);
   turn_ = opposite(turn_);
   return true;
 }

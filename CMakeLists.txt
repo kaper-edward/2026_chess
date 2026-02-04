@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(chess_core
   src/Board.cpp
+  src/CheckDetector.cpp
   src/GameState.cpp
   src/MoveRules.cpp
 )
@@ -29,6 +30,7 @@ if(ENABLE_TESTING)
 
   add_executable(chess_tests
     tests/test_board_setup.cpp
+    tests/test_check_detector.cpp
     tests/test_game_state.cpp
     tests/test_move_rules.cpp
   )
