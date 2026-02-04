@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(chess_core
   src/Board.cpp
+  src/GameState.cpp
   src/MoveRules.cpp
 )
 
@@ -28,6 +29,7 @@ if(ENABLE_TESTING)
 
   add_executable(chess_tests
     tests/test_board_setup.cpp
+    tests/test_game_state.cpp
     tests/test_move_rules.cpp
   )
   target_link_libraries(chess_tests PRIVATE chess_core gtest_main)

@@ -3,10 +3,6 @@
 #include <array>
 
 namespace {
-Color opposite(Color color) {
-  return (color == Color::White) ? Color::Black : Color::White;
-}
-
 void addIfValid(const Board& board, const Piece& piece, Position pos,
                std::vector<Position>& moves) {
   if (!Board::isInside(pos)) {
@@ -39,7 +35,7 @@ void addRay(const Board& board, const Piece& piece, Position from,
 }
 }  // namespace
 
-std::vector<Position> MoveRules::pseudoLegalMoves(const Board& board, Position from) {
+std::vector<Position> MoveRules::pseudoLegalMoves(const Board& board, Position from) const {
   std::vector<Position> moves;
   if (!Board::isInside(from)) {
     return moves;
