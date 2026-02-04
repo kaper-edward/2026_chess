@@ -25,3 +25,7 @@ GameStatus GameController::status() const {
 Color GameController::turn() const {
   return state_.turn();
 }
+
+const Board& GameController::board() const {
+  return state_.board();
+}

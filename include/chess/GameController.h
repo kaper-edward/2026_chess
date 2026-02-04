@@ -15,6 +15,7 @@ class GameController final : public IGameController {
   bool makeMove(const std::string& from, const std::string& to) override;
   GameStatus status() const override;
   Color turn() const override;
+  const Board& board() const override;
 
  private:
   GameState state_;

@@ -21,6 +21,16 @@ TEST(GameController, AppliesValidMove) {
   EXPECT_EQ(controller.turn(), Color::Black);
 }
 
+TEST(GameController, ExposesBoardView) {
+  GameController controller(std::make_unique<MoveRules>(),
+                            std::make_unique<CheckDetector>());
+
+  const Piece* pawn = controller.board().pieceAt({6, 0});
+  ASSERT_NE(pawn, nullptr);
+  EXPECT_EQ(pawn->type, PieceType::Pawn);
+  EXPECT_EQ(pawn->color, Color::White);
+}
+
 TEST(GameController, StatusIsOngoingAtStart) {
   GameController controller(std::make_unique<MoveRules>(),
                             std::make_unique<CheckDetector>());
