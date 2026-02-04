@@ -10,6 +10,7 @@ add_library(chess_core
   src/CoordinateParser.cpp
   src/GameState.cpp
   src/GameController.cpp
+  src/GameUI.cpp
   src/MoveRules.cpp
 )
 
@@ -35,6 +36,7 @@ if(ENABLE_TESTING)
     tests/test_check_detector.cpp
     tests/test_coordinate_parser.cpp
     tests/test_game_controller.cpp
+    tests/test_game_ui.cpp
     tests/test_game_state.cpp
     tests/test_move_rules.cpp
   )

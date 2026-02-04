@@ -16,6 +16,7 @@ class GameController final : public IGameController {
   GameStatus status() const override;
   Color turn() const override;
   const Board& board() const override;
+  std::vector<Position> legalMovesFrom(const std::string& square) const override;
 
  private:
   GameState state_;
