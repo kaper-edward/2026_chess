@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "chess/Board.h"
 #include "chess/ICheckDetector.h"
@@ -19,10 +20,12 @@ class GameState {
   const Board& board() const { return board_; }
   Color turn() const { return turn_; }
 
+  std::vector<Position> legalMovesFrom(Position from) const;
   GameStatus status() const;
   bool tryMove(Position from, Position to);
 
  private:
+  std::vector<Position> legalMovesFromInternal(Position from, Color color) const;
   bool hasAnyLegalMove(Color color) const;
 
   Board board_{};

@@ -1,10 +1,12 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "chess/Board.h"
 #include "chess/Color.h"
 #include "chess/GameStatus.h"
+#include "chess/Position.h"
 
 class IGameController {
  public:
@@ -14,4 +16,5 @@ class IGameController {
   virtual GameStatus status() const = 0;
   virtual Color turn() const = 0;
   virtual const Board& board() const = 0;
+  virtual std::vector<Position> legalMovesFrom(const std::string& square) const = 0;
 };

@@ -35,6 +35,10 @@ GameState GameState::Standard(std::unique_ptr<IMoveRules> moveRules,
                    std::move(checkDetector));
 }
 
+std::vector<Position> GameState::legalMovesFrom(Position from) const {
+  return legalMovesFromInternal(from, turn_);
+}
+
 GameStatus GameState::status() const {
   return hasAnyLegalMove(turn_) ? GameStatus::Ongoing : GameStatus::NoLegalMoves;
 }
@@ -80,15 +84,32 @@ bool GameState::hasAnyLegalMove(Color color) const {
         continue;
       }
 
-      const auto moves = moveRules_->pseudoLegalMoves(board_, from);
-      for (const auto& to : moves) {
-        Board next = board_;
-        next.movePiece(from, to);
-        if (!checkDetector_->inCheck(next, color)) {
-          return true;
-        }
+      if (!legalMovesFromInternal(from, color).empty()) {
+        return true;
       }
     }
   }
   return false;
+}
+
+std::vector<Position> GameState::legalMovesFromInternal(Position from, Color color) const {
+  std::vector<Position> result;
+  if (!Board::isInside(from)) {
+    return result;
+  }
+
+  const Piece* piece = board_.pieceAt(from);
+  if (!piece || piece->color != color) {
+    return result;
+  }
+
+  const auto moves = moveRules_->pseudoLegalMoves(board_, from);
+  for (const auto& to : moves) {
+    Board next = board_;
+    next.movePiece(from, to);
+    if (!checkDetector_->inCheck(next, color)) {
+      result.push_back(to);
+    }
+  }
+  return result;
 }

@@ -29,3 +29,11 @@ Color GameController::turn() const {
 const Board& GameController::board() const {
   return state_.board();
 }
+
+std::vector<Position> GameController::legalMovesFrom(const std::string& square) const {
+  auto pos = CoordinateParser::parse(square);
+  if (!pos) {
+    return {};
+  }
+  return state_.legalMovesFrom(*pos);
+}
